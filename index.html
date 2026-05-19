@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerForge | Job Portal & Interview Prep Hub</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <!-- Technical Background Grid and Floating Elements -->
+  <div class="bg-grid-overlay"></div>
+  <div class="bg-animations">
+    <div class="bubble bubble-1"><i class="fa-solid fa-code"></i></div>
+    <div class="bubble bubble-2"><i class="fa-solid fa-server"></i></div>
+    <div class="bubble bubble-3"><i class="fa-solid fa-database"></i></div>
+    <div class="bubble bubble-4"><i class="fa-solid fa-microchip"></i></div>
+    <div class="bubble bubble-5"><i class="fa-solid fa-terminal"></i></div>
+    <div class="bubble bubble-6"><i class="fa-solid fa-network-wired"></i></div>
+  </div>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">CF</div>
+        <span class="sidebar-brand-name">CareerForge</span>
+      </div>
+      
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-header">Overview</li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" data-target="landing">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" data-target="dashboard">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" data-target="jobs">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>Job Portal</span>
+          </a>
+        </li>
+        
+        <li class="sidebar-nav-header">Preparation</li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" data-target="prep">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Prep Arena</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" data-target="companies">
+            <i class="fa-solid fa-building"></i>
+            <span>Company Corner</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" data-target="dsa">
+            <i class="fa-solid fa-code"></i>
+            <span>DSA Prep Sheet</span>
+          </a>
+        </li>
+      </ul>
+      
+      <div class="sidebar-footer" style="justify-content: space-between; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="user-avatar" id="sidebar-avatar">AA</div>
+          <div class="user-info">
+            <span class="user-name" id="sidebar-name">Ayush Anand</span>
+            <span class="user-role">Candidate</span>
+          </div>
+        </div>
+        <button id="btn-logout" title="Sign Out" style="padding: 6px; font-size: 1rem; color: var(--danger); background: none; border: none; cursor: pointer; display: flex; align-items: center; transition: var(--transition);">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      
+      <!-- Top Header -->
+      <header class="app-header">
+        <button class="mobile-menu-toggle" id="mobile-toggle">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        
+        <div class="header-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="global-search" placeholder="Search jobs, DSA topics, companies...">
+        </div>
+        
+        <div class="header-actions">
+          <button class="notification-bell" id="theme-toggle" title="Toggle Theme" style="font-size: 1.1rem;">
+            <i class="fa-solid fa-sun"></i>
+          </button>
+          <button class="notification-bell">
+            <i class="fa-regular fa-bell"></i>
+            <span class="bell-badge"></span>
+          </button>
+          <div class="btn btn-secondary btn-sm" id="quick-dsa-btn">
+            <i class="fa-solid fa-fire"></i> DSA Sheet
+          </div>
+          <div id="header-auth-container" style="display: flex; align-items: center;"></div>
+        </div>
+      </header>
+
+      <!-- Dynamic Page Content Viewport -->
+      <main class="page-content">
+
+        <!-- SECTION 0: LANDING PAGE -->
+        <section class="page-section active" id="section-landing">
+          <!-- Landing Navbar -->
+          <header class="landing-header">
+            <div class="landing-brand">
+              <div class="sidebar-logo">CF</div>
+              <span class="landing-brand-name">CareerForge</span>
+            </div>
+            <nav class="landing-nav">
+              <a href="#" class="landing-nav-link active" data-target="landing">Home</a>
+              <a href="#" class="landing-nav-link" data-target="jobs">Job Portal</a>
+              <a href="#" class="landing-nav-link" data-target="prep">Preparation</a>
+              <a href="#" class="landing-nav-link" data-target="companies">Companies</a>
+              <a href="#" class="landing-nav-link" data-target="dsa">DSA Sheet</a>
+            </nav>
+            <div class="landing-header-actions">
+              <button class="btn btn-secondary btn-sm" id="landing-theme-toggle" title="Toggle Theme" style="font-size: 1.1rem; padding: 6px 12px;"><i class="fa-solid fa-sun"></i></button>
+              <button class="btn btn-primary btn-sm" id="landing-signin-btn">Sign In</button>
+            </div>
+          </header>
+
+          <!-- Landing Hero Container -->
+          <div class="landing-hero">
+            <div class="landing-hero-content">
+              <div class="landing-badge">
+                <i class="fa-solid fa-sparkles"></i> The Ultimate Tech Career Prep Suite
+              </div>
+              <h1 class="landing-hero-title">
+                Unlock Your <span class="gradient-text">Professional</span> Destiny
+              </h1>
+              <p class="landing-hero-subtitle">
+                An all-in-one platform to land your dream engineering job. Solve interactive DSA sheets, practice mock aptitude quizzes, review company-specific recruitment Blueprints, and apply directly to active openings.
+              </p>
+              <div class="landing-cta-container">
+                <button class="btn btn-primary" id="landing-cta-explore" style="padding: 12px 24px; font-size: 1rem;">
+                  Explore Career Paths <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <button class="btn btn-secondary" id="landing-cta-dsa" style="padding: 12px 24px; font-size: 1rem;">
+                  <i class="fa-solid fa-fire"></i> Try DSA Practice
+                </button>
+              </div>
+            </div>
+            
+            <!-- Isometric Dashboard Image mockup in hero -->
+            <div class="landing-hero-graphic">
+              <div class="landing-graphic-wrapper">
+                <img src="bg_dashboard.png" alt="CareerForge Dashboard Mockup" class="landing-mockup-img">
+                <div class="graphic-glow"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature Highlights Grid -->
+          <div class="landing-features-container">
+            <div class="landing-section-header">
+              <h2 class="landing-section-title">Everything You Need to Succeed</h2>
+              <p class="landing-section-subtitle">A cohesive workspace for your preparation and job search lifecycle.</p>
+            </div>
+            
+            <div class="landing-features-grid">
+              <div class="landing-feature-card" data-target="jobs">
+                <div class="feature-icon-wrapper purple">
+                  <i class="fa-solid fa-briefcase"></i>
+                </div>
+                <h3>Job Portal</h3>
+                <p>Browse high-paying jobs, filter by experience, and apply with persistent simulated resumes. Post custom listings.</p>
+                <span class="feature-link">Browse Jobs <i class="fa-solid fa-chevron-right"></i></span>
+              </div>
+              
+              <div class="landing-feature-card" data-target="prep">
+                <div class="feature-icon-wrapper emerald">
+                  <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3>Preparation Arena</h3>
+                <p>Practice MCQs on Quantitative Aptitude, DBMS, and OS. Test your coding skills with our integrated compiler sandbox.</p>
+                <span class="feature-link">Start Practice <i class="fa-solid fa-chevron-right"></i></span>
+              </div>
+              
+              <div class="landing-feature-card" data-target="companies">
+                <div class="feature-icon-wrapper amber">
+                  <i class="fa-solid fa-building"></i>
+                </div>
+                <h3>Company Placement Hub</h3>
+                <p>Unlock recruitment insights, syllabus topics, eligibility requirements, and interview timelines for 24+ top tech firms.</p>
+                <span class="feature-link">Unlock Blueprints <i class="fa-solid fa-chevron-right"></i></span>
+              </div>
+              
+              <div class="landing-feature-card" data-target="dsa">
+                <div class="feature-icon-wrapper indigo">
+                  <i class="fa-solid fa-code"></i>
+                </div>
+                <h3>DSA Prep Sheet</h3>
+                <p>Solve topic-wise curated coding problems with interactive checkbox trackers, compiler run buttons, and personal revision notes.</p>
+                <span class="feature-link">Solve Sheet <i class="fa-solid fa-chevron-right"></i></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Landing Footer -->
+          <footer class="landing-footer">
+            <p>&copy; 2026 CareerForge. Premium Glassmorphic Design for Ayush Anand.</p>
+          </footer>
+        </section>
+
+        <!-- SECTION 1: DASHBOARD -->
+        <section class="page-section" id="section-dashboard">
+          <div class="section-bg-art bg-art-right" style="background-image: url('bg_dashboard.png');"></div>
+          <div class="page-title-block">
+            <h1 class="page-title" id="dashboard-greeting">Welcome back, Ayush!</h1>
+            <p class="page-subtitle">Here is your career preparation and job portal status for today.</p>
+          </div>
+          
+          <!-- Key Metrics Grid -->
+          <div class="dashboard-grid">
+            <div class="glass-card">
+              <div class="stat-card-glow"></div>
+              <div class="stat-header">
+                <span class="stat-title">DSA Progress</span>
+                <div class="stat-icon indigo"><i class="fa-solid fa-circle-check"></i></div>
+              </div>
+              <div class="stat-val" id="dash-dsa-count">0 / 0</div>
+              <div class="stat-desc">
+                <span class="stat-trend-up" id="dash-dsa-pct">0%</span> of DSA sheet completed
+              </div>
+            </div>
+            
+            <div class="glass-card">
+              <div class="stat-card-glow"></div>
+              <div class="stat-header">
+                <span class="stat-title">Applications</span>
+                <div class="stat-icon emerald"><i class="fa-solid fa-paper-plane"></i></div>
+              </div>
+              <div class="stat-val" id="dash-app-count">0</div>
+              <div class="stat-desc">Active job applications submitted</div>
+            </div>
+            
+            <div class="glass-card">
+              <div class="stat-card-glow"></div>
+              <div class="stat-header">
+                <span class="stat-title">Job Postings</span>
+                <div class="stat-icon purple"><i class="fa-solid fa-briefcase"></i></div>
+              </div>
+              <div class="stat-val" id="dash-job-count">0</div>
+              <div class="stat-desc">Job opportunities available</div>
+            </div>
+
+            <div class="glass-card">
+              <div class="stat-card-glow"></div>
+              <div class="stat-header">
+                <span class="stat-title">Prep Score</span>
+                <div class="stat-icon amber"><i class="fa-solid fa-award"></i></div>
+              </div>
+              <div class="stat-val" id="dash-score-val">0/0</div>
+              <div class="stat-desc">Quiz questions solved correctly</div>
+            </div>
+          </div>
+          
+          <!-- Dashboard Sub-layouts -->
+          <div class="dashboard-layout-grid">
+            <div class="dashboard-main-col">
+              
+              <!-- Quick DSA Tracker Widget -->
+              <div class="glass-card">
+                <div class="card-header-actions">
+                  <h3 class="card-title"><i class="fa-solid fa-compass"></i> Recommended Next Steps</h3>
+                  <button class="btn btn-outline btn-sm" id="dash-go-dsa">View DSA Sheet</button>
+                </div>
+                <div class="dsa-progress-bar-container" style="margin-bottom: 20px;">
+                  <div class="dsa-progress-stats">
+                    <span>Overall Checklist Completion</span>
+                    <span id="dash-progress-text">0%</span>
+                  </div>
+                  <div class="dsa-progress-bar-wrapper">
+                    <div class="dsa-progress-bar-fill" id="dash-progress-fill"></div>
+                  </div>
+                </div>
+                <div id="dash-recommended-problem" style="padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background-color: rgba(255, 255, 255, 0.01);">
+                  <!-- Dynamic content -->
+                </div>
+              </div>
+
+              <!-- Top Job Openings Recs -->
+              <div class="glass-card">
+                <div class="card-header-actions">
+                  <h3 class="card-title"><i class="fa-solid fa-star"></i> Featured Job Openings</h3>
+                  <button class="btn btn-secondary btn-sm" id="dash-go-jobs">Explore Portal</button>
+                </div>
+                <div id="dash-featured-jobs" style="display: flex; flex-direction: column; gap: 12px;">
+                  <!-- Dynamic Job Cards -->
+                </div>
+              </div>
+
+            </div>
+
+            <div class="dashboard-side-col">
+              <!-- Company hiring events -->
+              <div class="glass-card">
+                <h3 class="card-title" style="margin-bottom: 16px;"><i class="fa-solid fa-calendar-days"></i> Hiring Drivers</h3>
+                <div id="dash-company-list" style="display: flex; flex-direction: column; gap: 14px;">
+                  <!-- Dynamic hiring list -->
+                </div>
+              </div>
+
+              <!-- Activity Log -->
+              <div class="glass-card">
+                <h3 class="card-title" style="margin-bottom: 16px;"><i class="fa-solid fa-history"></i> Recent Activities</h3>
+                <div id="dash-activity-list" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem; color: var(--text-secondary);">
+                  <!-- Dynamic log -->
+                  <div style="padding-bottom: 8px; border-bottom: 1px solid var(--border);">No activities recorded yet. Start solving problems or applying to jobs!</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 2: JOB PORTAL -->
+        <section class="page-section" id="section-jobs">
+          <div class="section-bg-art bg-art-left" style="background-image: url('bg_dashboard.png');"></div>
+          <div class="page-title-block">
+            <h1 class="page-title">Career Opportunities</h1>
+            <p class="page-subtitle">Browse, filter, and apply for roles or list a new job on our platform.</p>
+          </div>
+          
+          <div class="job-portal-actions">
+            <div class="job-search-input">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="job-search" placeholder="Search by job title, company, skills...">
+            </div>
+            
+            <select class="job-filter-select" id="filter-type">
+              <option value="">All Job Types</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Contract">Contract</option>
+              <option value="Internship">Internship</option>
+            </select>
+            
+            <select class="job-filter-select" id="filter-location">
+              <option value="">All Locations</option>
+              <option value="Remote">Remote</option>
+              <option value="Bangalore">Bangalore</option>
+              <option value="Hyderabad">Hyderabad</option>
+              <option value="Noida">Noida</option>
+              <option value="Pune">Pune</option>
+            </select>
+
+            <select class="job-filter-select" id="filter-experience">
+              <option value="">All Experience</option>
+              <option value="Entry-Level">Entry-Level</option>
+              <option value="Mid-Level">Mid-Level</option>
+              <option value="Senior-Level">Senior-Level</option>
+            </select>
+            
+            <button class="btn btn-primary" id="btn-post-job-trigger">
+              <i class="fa-solid fa-plus"></i> Post a Job
+            </button>
+          </div>
+          
+          <!-- Job Portal Grid Layout -->
+          <div class="job-listings-layout">
+            <!-- Left Side: Job Cards List -->
+            <div class="job-cards-container" id="job-list-container">
+              <!-- Dynamically rendered -->
+            </div>
+            
+            <!-- Right Side: Job details view -->
+            <div class="job-details-pane-wrapper">
+              <div class="job-details-pane" id="job-details-view">
+                <!-- Dynamically rendered details -->
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                  <i class="fa-solid fa-arrow-left" style="font-size: 2rem; margin-bottom: 12px; display: block; color: var(--primary);"></i>
+                  Select a job role from the list to view comprehensive details and requirements.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 3: PREP ARENA -->
+        <section class="page-section" id="section-prep">
+          <div class="section-bg-art bg-art-right" style="background-image: url('bg_prep.png');"></div>
+          <div class="page-title-block">
+            <h1 class="page-title">Preparation Arena</h1>
+            <p class="page-subtitle">Learn fundamentals, read summarized interview notes, and test yourself on key subjects.</p>
+          </div>
+          
+          <!-- Tab Navs -->
+          <div class="prep-tabs">
+            <button class="prep-tab-btn active" data-subtab="aptitude">
+              <i class="fa-solid fa-calculator"></i> Quantitative & Aptitude
+            </button>
+            <button class="prep-tab-btn" data-subtab="dsa">
+              <i class="fa-solid fa-sitemap"></i> DSA Theory
+            </button>
+            <button class="prep-tab-btn" data-subtab="technical">
+              <i class="fa-solid fa-database"></i> Core Technical (OS/DBMS/CN)
+            </button>
+            <button class="prep-tab-btn" data-subtab="hr">
+              <i class="fa-solid fa-user-tie"></i> HR Interview Guide
+            </button>
+          </div>
+          
+          <!-- Grid Layout: Left Study Notes, Right Quiz Panel -->
+          <div class="prep-grid">
+            
+            <!-- Notes (Left Column) -->
+            <div class="prep-notes-section">
+              <h3 class="card-title" style="margin-bottom: 12px;"><i class="fa-solid fa-book-open"></i> Concept Summaries & Cheat Sheets</h3>
+              <div id="prep-notes-accordion">
+                <!-- Dynamically loaded -->
+              </div>
+            </div>
+            
+            <!-- Quiz Arena (Right Column) -->
+            <div class="prep-practice-section">
+              <h3 class="card-title" style="margin-bottom: 12px;"><i class="fa-solid fa-laptop-code"></i> Interactive Practice & Verification</h3>
+              
+              <div class="practice-card" id="quiz-card-container">
+                <!-- Dynamically loaded Quiz / Practice code -->
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- SECTION 4: COMPANY CORNER -->
+        <section class="page-section" id="section-companies">
+          <div class="page-title-block">
+            <h1 class="page-title">Company Placement Hub</h1>
+            <p class="page-subtitle">Review exam patterns, recruitment syllabus details, and check eligibility criteria for top tech companies.</p>
+          </div>
+          
+          <!-- Grid of Company Selection Cards -->
+          <div class="companies-grid" id="companies-select-grid">
+            <!-- Dynamically populated -->
+          </div>
+          
+          <!-- Dynamic details view -->
+          <div class="glass-card" id="company-detail-card" style="display:none;">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+        <!-- SECTION 5: DSA PREP SHEET -->
+        <section class="page-section" id="section-dsa">
+          <div class="page-title-block">
+            <h1 class="page-title">Topic-Wise DSA Practice Sheet</h1>
+            <p class="page-subtitle">Track your problem solving progress across standard interview sheets, save your codes and take revision notes.</p>
+          </div>
+          
+          <!-- DSA Progress Stats Panel -->
+          <div class="glass-card" style="margin-bottom: 24px;">
+            <div class="dsa-progress-panel">
+              <div class="dsa-progress-bar-container">
+                <div class="dsa-progress-stats">
+                  <span>Overall Problem Completion</span>
+                  <span id="dsa-overall-ratio">0/0 Problems (0%)</span>
+                </div>
+                <div class="dsa-progress-bar-wrapper">
+                  <div class="dsa-progress-bar-fill" id="dsa-overall-bar"></div>
+                </div>
+              </div>
+              
+              <div class="dsa-circular-container">
+                <div class="circular-progress">
+                  <svg>
+                    <circle class="bg" cx="36" cy="36" r="32"></circle>
+                    <circle class="fill" id="dsa-circle-stroke" cx="36" cy="36" r="32"></circle>
+                  </svg>
+                  <div class="circular-progress-text" id="dsa-circle-text">0%</div>
+                </div>
+                <div>
+                  <h4 style="font-size: 0.95rem; font-weight:700;">Consistent Practice</h4>
+                  <p style="font-size:0.775rem; color:var(--text-secondary);">Complete 1 problem daily to stay in rhythm.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Topic Filters -->
+          <div class="dsa-topics-filter" id="dsa-topic-filters">
+            <!-- Dynamic Category Pills -->
+          </div>
+          
+          <!-- Table of Problems -->
+          <div class="dsa-table-wrapper">
+            <table class="dsa-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">Status</th>
+                  <th>Problem Statement</th>
+                  <th>Difficulty</th>
+                  <th style="width: 140px;">Category</th>
+                  <th style="width: 200px; text-align: center;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dsa-problem-rows">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+      
+    </div>
+  </div>
+
+  <!-- MODAL: Apply to Job -->
+  <div class="modal-overlay" id="modal-apply-job">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="apply-modal-title">Apply for Job Role</h3>
+        <button class="modal-close-btn" data-close="apply-job"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-apply-job">
+          <input type="hidden" id="apply-job-id">
+          <div class="form-group">
+            <label class="form-label" for="apply-name">Full Name</label>
+            <input type="text" id="apply-name" class="form-input" required value="Ayush Anand">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="apply-email">Email Address</label>
+            <input type="email" id="apply-email" class="form-input" required value="ayush.anand@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="apply-github">GitHub / Portfolio Link</label>
+            <input type="url" id="apply-github" class="form-input" placeholder="https://github.com/ayushanand" required value="https://github.com/ayushanand">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="apply-resume">Resume Upload Simulation</label>
+            <input type="file" id="apply-resume" class="form-input" accept=".pdf,.doc,.docx" required>
+            <small style="color:var(--text-muted); font-size:0.75rem; display:block; margin-top:4px;">Upload your PDF or Word resume (Max 5MB).</small>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="apply-cover">Cover Letter / Why should we hire you?</label>
+            <textarea id="apply-cover" class="form-textarea" placeholder="Describe your experience and qualifications for this role..." required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-close="apply-job">Cancel</button>
+            <button type="submit" class="btn btn-primary">Submit Application</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Post a Job -->
+  <div class="modal-overlay" id="modal-post-job">
+    <div class="modal-container" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Post a New Career Opening</h3>
+        <button class="modal-close-btn" data-close="post-job"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-post-job">
+          <div class="form-group">
+            <label class="form-label" for="post-title">Job Title</label>
+            <input type="text" id="post-title" class="form-input" placeholder="e.g. Software Development Engineer I (SDE-1)" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="post-company">Company Name</label>
+            <input type="text" id="post-company" class="form-input" placeholder="e.g. Amazon, Google, Meta" required>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div class="form-group">
+              <label class="form-label" for="post-type">Job Type</label>
+              <select id="post-type" class="form-select" required>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="post-exp">Experience Requirement</label>
+              <select id="post-exp" class="form-select" required>
+                <option value="Entry-Level">Entry-Level (0-2 Yrs)</option>
+                <option value="Mid-Level">Mid-Level (2-5 Yrs)</option>
+                <option value="Senior-Level">Senior-Level (5+ Yrs)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div class="form-group">
+              <label class="form-label" for="post-loc">Job Location</label>
+              <input type="text" id="post-loc" class="form-input" placeholder="e.g. Remote, Bangalore, Hyderabad" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="post-sal">Salary Range</label>
+              <input type="text" id="post-sal" class="form-input" placeholder="e.g. ₹12LPA - ₹18LPA" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="post-desc">Job Description</label>
+            <textarea id="post-desc" class="form-textarea" placeholder="Detailed outline of role, day-to-day operations and team focus..." required style="min-height: 80px;"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="post-reqs">Requirements (Comma Separated)</label>
+            <input type="text" id="post-reqs" class="form-input" placeholder="e.g. React, Node.js, DSA, System Design, 3+ Yrs experience" required>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-close="post-job">Cancel</button>
+            <button type="submit" class="btn btn-primary">Publish Job Opening</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DSA Problem Note Editor -->
+  <div class="modal-overlay" id="modal-dsa-notes">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="dsa-notes-title">Problem Notes & Code Templates</h3>
+        <button class="modal-close-btn" data-close="dsa-notes"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-dsa-notes">
+          <input type="hidden" id="dsa-notes-prob-id">
+          <div class="form-group">
+            <label class="form-label">Notes for revision</label>
+            <textarea id="dsa-notes-textarea" class="form-textarea" style="min-height: 250px; font-family: var(--font-mono); font-size: 0.85rem;" placeholder="Save your notes, complexity analysis (e.g. Time: O(N log N), Space: O(1)), or standard templates here..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-close="dsa-notes">Close</button>
+            <button type="submit" class="btn btn-primary">Save Notes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Screen Login Overlay -->
+  <div class="modal-overlay active" id="login-overlay" style="z-index: 999; backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);">
+    <div class="modal-container" style="max-width: 400px; border-radius: var(--radius-lg); background-color: var(--bg-secondary);">
+      <div class="modal-body" style="padding: 32px; display: flex; flex-direction: column; gap: 20px;">
+        <div style="text-align: center;">
+          <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.5rem; color: white; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">CF</div>
+          <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 4px;">Welcome to CareerForge</h2>
+          <p style="color: var(--text-secondary); font-size: 0.85rem;" id="login-subtitle">Sign in to access your jobs and preparation hub.</p>
+        </div>
+        
+        <!-- Tab selector for Login / Signup -->
+        <div style="display: flex; border-bottom: 1px solid var(--border); padding-bottom: 8px; gap: 8px;">
+          <button type="button" class="prep-tab-btn active" id="tab-login" style="flex: 1; justify-content: center; padding: 6px; font-size: 0.85rem;">Sign In</button>
+          <button type="button" class="prep-tab-btn" id="tab-signup" style="flex: 1; justify-content: center; padding: 6px; font-size: 0.85rem;">Sign Up</button>
+        </div>
+        
+        <form id="form-login">
+          <!-- Name field for signup, hidden by default -->
+          <div class="form-group" id="group-name" style="display: none; margin-bottom: 16px;">
+            <label class="form-label" for="login-name">Full Name</label>
+            <input type="text" id="login-name" class="form-input" placeholder="e.g. Ayush Anand">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="login-email">Email Address</label>
+            <input type="email" id="login-email" class="form-input" placeholder="e.g. ayush@example.com" required value="ayush@example.com">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="login-pass">Password</label>
+            <input type="password" id="login-pass" class="form-input" placeholder="••••••••" required value="password123">
+          </div>
+          
+          <div id="login-demo-notice" style="font-size: 0.725rem; color: var(--text-muted); text-align: center; margin-bottom: 4px; line-height: 1.4;">
+            Demo Account: <strong>ayush@example.com</strong> / <strong>password123</strong>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px; padding: 12px;" id="btn-login-submit">Sign In</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
