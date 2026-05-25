@@ -4,7 +4,7 @@
 // 1. MOCK DATABASES
 // ==========================================
 
-const MOCK_JOBS = [
+let MOCK_JOBS = [
   {
     id: "job-1",
     title: "Software Development Engineer - I (SDE-1)",
@@ -91,7 +91,7 @@ const MOCK_JOBS = [
   }
 ];
 
-const MOCK_PREP = {
+let MOCK_PREP = {
   aptitude: {
     notes: [
       {
@@ -338,7 +338,7 @@ const MOCK_PREP = {
   }
 };
 
-const MOCK_COMPANIES = [
+let MOCK_COMPANIES = [
   {
     id: "comp-amazon",
     name: "Amazon",
@@ -1014,7 +1014,7 @@ const MOCK_COMPANIES = [
   }
 ];
 
-const MOCK_DSA_SHEET = [
+let MOCK_DSA_SHEET = [
   { id: "dsa-1", title: "Two Sum", difficulty: "Easy", topic: "Arrays", link: "https://leetcode.com/problems/two-sum/", desc: "Find two numbers in an array that add up to a specific target." },
   { id: "dsa-2", title: "Maximum Subarray (Kadane's)", difficulty: "Medium", topic: "Arrays", link: "https://leetcode.com/problems/maximum-subarray/", desc: "Find the contiguous subarray with the largest sum." },
   { id: "dsa-3", title: "3Sum", difficulty: "Medium", topic: "Arrays", link: "https://leetcode.com/problems/3sum/", desc: "Find all unique triplets in the array that sum to zero." },
@@ -1060,6 +1060,53 @@ const state = {
   ]
 };
 
+// API Base Configuration
+const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : window.location.origin;
+
+async function parseJsonResponse(res) {
+  const text = await res.text();
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`Expected JSON response but received: ${text.slice(0, 120)}`);
+  }
+}
+
+// State Synchronization from Backend Database
+async function syncState() {
+  try {
+    const jobsRes = await fetch(`${API_BASE}/api/jobs`);
+    if (jobsRes.ok) MOCK_JOBS = await jobsRes.json();
+
+    const compRes = await fetch(`${API_BASE}/api/companies`);
+    if (compRes.ok) MOCK_COMPANIES = await compRes.json();
+
+    const dsaRes = await fetch(`${API_BASE}/api/dsa`);
+    if (dsaRes.ok) MOCK_DSA_SHEET = await dsaRes.json();
+
+    const prepRes = await fetch(`${API_BASE}/api/prep`);
+    if (prepRes.ok) MOCK_PREP = await prepRes.json();
+
+    if (state.isLoggedIn) {
+      const syncRes = await fetch(`${API_BASE}/api/sync?email=${encodeURIComponent(state.userEmail)}`);
+      if (syncRes.ok) {
+        const data = await syncRes.json();
+        state.appliedJobIds = data.appliedJobIds || [];
+        state.customJobs = data.customJobs || [];
+        state.solvedDsaProblemIds = new Set(data.solvedDsaProblemIds || []);
+        state.dsaProblemNotes = data.dsaProblemNotes || {};
+        state.quizScores = data.quizScores || {};
+        state.hrAnswers = data.hrAnswers || {};
+        state.activityLog = data.activityLog || [];
+      }
+    }
+  } catch (err) {
+    console.error("Error syncing with backend:", err);
+  }
+}
+
 // State Helper Functions
 function saveState(key, val) {
   if (key === "cf_solved_dsa") {
@@ -1069,11 +1116,25 @@ function saveState(key, val) {
   }
 }
 
-function addActivity(msg) {
+async function addActivity(msg) {
   const time = new Date().toLocaleTimeString();
   state.activityLog.unshift({ time, msg });
   if (state.activityLog.length > 8) state.activityLog.pop(); // keep last 8
   saveState("cf_activities", state.activityLog);
+
+  // Sync to database
+  if (state.isLoggedIn) {
+    try {
+      await fetch(`${API_BASE}/api/activities`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userEmail: state.userEmail, msg })
+      });
+    } catch (err) {
+      console.error("Failed to sync activity to server:", err);
+    }
+  }
+
   renderDashboard(); // Update activity log widget
 }
 
@@ -1165,7 +1226,7 @@ function initNavigation() {
   document.getElementById("dash-go-jobs").addEventListener("click", () => switchTab("jobs"));
   
   // Prep arena subtabs switching
-  const prepSubtabBtns = document.querySelectorAll(".prep-tab-btn");
+  const prepSubtabBtns = document.querySelectorAll(".prep-tab-btn[data-subtab]");
   prepSubtabBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       prepSubtabBtns.forEach(b => b.classList.remove("active"));
@@ -1522,8 +1583,27 @@ function renderJobDetails(job) {
 // ==========================================
 
 function renderPrepArena() {
-  const currentSub = state.activePrepSubtab;
-  const data = MOCK_PREP[currentSub];
+  let currentSub = state.activePrepSubtab;
+  let data = MOCK_PREP[currentSub];
+
+  if (!data || !Array.isArray(data.notes) || !Array.isArray(data.quizzes)) {
+    const fallbackSub = Object.keys(MOCK_PREP).find((key) => {
+      const prepData = MOCK_PREP[key];
+      return prepData && Array.isArray(prepData.notes) && Array.isArray(prepData.quizzes);
+    });
+
+    if (!fallbackSub) {
+      console.error("Prep arena data is unavailable or malformed:", MOCK_PREP);
+      return;
+    }
+
+    state.activePrepSubtab = fallbackSub;
+    currentSub = fallbackSub;
+    data = MOCK_PREP[fallbackSub];
+    document.querySelectorAll(".prep-tab-btn[data-subtab]").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-subtab") === fallbackSub);
+    });
+  }
   
   // Render Accordion Notes (Left Side)
   const accordionContainer = document.getElementById("prep-notes-accordion");
@@ -1620,7 +1700,7 @@ function renderPrepArena() {
           });
         });
         
-        document.getElementById("btn-submit-answer").addEventListener("click", () => {
+        document.getElementById("btn-submit-answer").addEventListener("click", async () => {
           const userChoiceIdx = state.quizScores[quiz.id + "_choice"];
           if (userChoiceIdx === undefined) {
             showToast("Please select an answer choice first!", "warning");
@@ -1630,6 +1710,19 @@ function renderPrepArena() {
           const isCorrect = userChoiceIdx === quiz.correctIndex;
           state.quizScores[quiz.id] = isCorrect ? "correct" : "incorrect";
           saveState("cf_quiz_scores", state.quizScores);
+
+          // Sync score to database
+          if (state.isLoggedIn) {
+            try {
+              await fetch(`${API_BASE}/api/quizzes/score`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail: state.userEmail, quizId: quiz.id, choice: userChoiceIdx, isCorrect })
+              });
+            } catch (err) {
+              console.error("Failed to sync quiz score:", err);
+            }
+          }
           
           if (isCorrect) {
             showToast("Excellent! Correct Answer.", "success");
@@ -1721,6 +1814,33 @@ function renderPrepArena() {
               if (!state.quizScores[quiz.id]) {
                 state.quizScores[quiz.id] = "correct";
                 saveState("cf_quiz_scores", state.quizScores);
+
+                // Sync code compilation verification to database
+                if (state.isLoggedIn) {
+                  try {
+                    fetch(`${API_BASE}/api/quizzes/score`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        userEmail: state.userEmail,
+                        quizId: quiz.id,
+                        choice: 0,
+                        isCorrect: true,
+                      }),
+                    })
+                      .then((res) => res.json())
+                      .then((data) => {
+                        console.log("Score synced", data);
+                      })
+                      .catch((err) => {
+                        console.error("Fetch failed:", err);
+                      });
+                  } catch (err) {
+                    console.error("Failed to sync code quiz score:", err);
+                  }
+                }
                 addActivity("Compiled and verified DSA code reversal practice question successfully!");
                 renderDashboard();
                 // Brief delay re-render to update checkbox/marks
@@ -1765,7 +1885,7 @@ function renderPrepArena() {
         </div>
       `;
       
-      document.getElementById("btn-save-hr-pitch").addEventListener("click", () => {
+      document.getElementById("btn-save-hr-pitch").addEventListener("click", async () => {
         const text = document.getElementById("hr-draft-textarea").value;
         if (!text.trim()) {
           showToast("Draft cannot be completely empty!", "warning");
@@ -1778,6 +1898,24 @@ function renderPrepArena() {
         // Mark score status
         state.quizScores[quiz.id] = "correct";
         saveState("cf_quiz_scores", state.quizScores);
+
+        // Sync HR answer to database
+        if (state.isLoggedIn) {
+          try {
+            await fetch(`${API_BASE}/api/hr`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userEmail: state.userEmail, questionId: quiz.id, answer: text })
+            });
+            await fetch(`${API_BASE}/api/quizzes/score`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userEmail: state.userEmail, quizId: quiz.id, choice: 0, isCorrect: true })
+            });
+          } catch (err) {
+            console.error("Failed to sync HR answer:", err);
+          }
+        }
         
         addActivity("Created and saved customized HR response draft pitch.");
         showToast("HR response template successfully logged!", "success");
@@ -2028,11 +2166,14 @@ function renderDsaSheet() {
   });
 }
 
-function toggleDsaProblem(probId) {
+async function toggleDsaProblem(probId) {
   const prob = MOCK_DSA_SHEET.find(p => p.id === probId);
   if (!prob) return;
   
-  if (state.solvedDsaProblemIds.has(probId)) {
+  const wasSolved = state.solvedDsaProblemIds.has(probId);
+  const newSolvedState = !wasSolved;
+
+  if (wasSolved) {
     state.solvedDsaProblemIds.delete(probId);
     addActivity(`Marked DSA problem "${prob.title}" as incomplete.`);
     showToast(`Incomplete: ${prob.title}`, "info");
@@ -2043,6 +2184,20 @@ function toggleDsaProblem(probId) {
   }
   
   saveState("cf_solved_dsa", state.solvedDsaProblemIds);
+
+  // Sync DSA solved state to database
+  if (state.isLoggedIn) {
+    try {
+      await fetch(`${API_BASE}/api/dsa/solve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userEmail: state.userEmail, problemId: probId, solved: newSolvedState })
+      });
+    } catch (err) {
+      console.error("Failed to sync DSA solved state:", err);
+    }
+  }
+
   renderDsaSheet();
   renderDashboard();
 }
@@ -2100,9 +2255,18 @@ function initFormHandlers() {
   });
 
   // Form: Apply for Job
-  document.getElementById("form-apply-job").addEventListener("submit", (e) => {
+  document.getElementById("form-apply-job").addEventListener("submit", async (e) => {
     e.preventDefault();
     const jobId = document.getElementById("apply-job-id").value;
+    const name = document.getElementById("apply-name").value;
+    const email = document.getElementById("apply-email").value;
+    const github = document.getElementById("apply-github").value;
+    const coverLetter = document.getElementById("apply-cover").value;
+    
+    // Simulate resume upload
+    const resumeFile = document.getElementById("apply-resume").files[0];
+    const resumeName = resumeFile ? resumeFile.name : "resume_submission.pdf";
+
     const allJobs = [...MOCK_JOBS, ...state.customJobs];
     const job = allJobs.find(j => j.id === jobId);
     
@@ -2111,6 +2275,19 @@ function initFormHandlers() {
     // Process application state
     state.appliedJobIds.push(jobId);
     saveState("cf_applied_jobs", state.appliedJobIds);
+
+    // Sync application to database
+    if (state.isLoggedIn) {
+      try {
+        await fetch(`${API_BASE}/api/jobs/apply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jobId, userEmail: state.userEmail, name, email, github, resumeName, coverLetter })
+        });
+      } catch (err) {
+        console.error("Failed to sync application to server:", err);
+      }
+    }
     
     addActivity(`Successfully applied to ${job.title} position at ${job.company}.`);
     showToast(`Application submitted to ${job.company}!`, "success");
@@ -2125,7 +2302,7 @@ function initFormHandlers() {
   });
 
   // Form: Publish New Job
-  document.getElementById("form-post-job").addEventListener("submit", (e) => {
+  document.getElementById("form-post-job").addEventListener("submit", async (e) => {
     e.preventDefault();
     
     const title = document.getElementById("post-title").value;
@@ -2139,20 +2316,42 @@ function initFormHandlers() {
     
     const requirements = reqsInput.split(",").map(r => r.trim()).filter(r => r.length > 0);
     
-    const newJob = {
-      id: `custom-job-${Date.now()}`,
+    let newJob = {
       title,
       company,
       location: loc,
       type,
       experience: exp,
       salary: sal,
-      posted: "Just now",
-      logoInitials: company.slice(0, 2).toUpperCase(),
-      color: "#" + Math.floor(Math.random()*16777215).toString(16), // random color
       description: desc,
       requirements
     };
+
+    // Sync new job to database
+    if (state.isLoggedIn) {
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newJob)
+        });
+        if (res.ok) {
+          newJob = await res.json();
+        } else {
+          showToast("Failed to post job to database", "danger");
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to post job:", err);
+        showToast("Network error publishing job", "danger");
+        return;
+      }
+    } else {
+      newJob.id = `custom-job-${Date.now()}`;
+      newJob.posted = "Just now";
+      newJob.logoInitials = company.slice(0, 2).toUpperCase();
+      newJob.color = "#" + Math.floor(Math.random()*16777215).toString(16);
+    }
     
     state.customJobs.unshift(newJob);
     saveState("cf_custom_jobs", state.customJobs);
@@ -2171,13 +2370,26 @@ function initFormHandlers() {
   });
 
   // Form: Save DSA Problem Notes
-  document.getElementById("form-dsa-notes").addEventListener("submit", (e) => {
+  document.getElementById("form-dsa-notes").addEventListener("submit", async (e) => {
     e.preventDefault();
     const probId = document.getElementById("dsa-notes-prob-id").value;
     const noteText = document.getElementById("dsa-notes-textarea").value;
     
     state.dsaProblemNotes[probId] = noteText;
     saveState("cf_dsa_notes", state.dsaProblemNotes);
+
+    // Sync notes to database
+    if (state.isLoggedIn) {
+      try {
+        await fetch(`${API_BASE}/api/dsa/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userEmail: state.userEmail, problemId: probId, notes: noteText })
+        });
+      } catch (err) {
+        console.error("Failed to sync DSA notes:", err);
+      }
+    }
     
     const prob = MOCK_DSA_SHEET.find(p => p.id === probId);
     const title = prob ? prob.title : "DSA Problem";
@@ -2332,25 +2544,41 @@ function initAuthHandlers() {
   }
   
   if (formLogin) {
-    formLogin.addEventListener("submit", (e) => {
+    formLogin.addEventListener("submit", async (e) => {
       e.preventDefault();
       
       const email = document.getElementById("login-email").value;
       const pass = document.getElementById("login-pass").value;
       
       if (currentAuthMode === "login") {
-        if (email === "ayush@example.com" && pass === "password123") {
-          state.userName = "Ayush Anand";
-        } else {
-          const namePart = email.split("@")[0];
-          state.userName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        try {
+          const res = await fetch(`${API_BASE}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password: pass })
+          });
+          if (!res.ok) {
+            const data = await parseJsonResponse(res);
+            showToast(data?.error || "Login failed", "danger");
+            return;
+          }
+          const user = await parseJsonResponse(res);
+          if (!user) throw new Error("Login returned an empty response body");
+          state.userName = user.name;
+          state.userEmail = user.email;
+        } catch (err) {
+          console.error("Login network error:", err);
+          showToast("Network error signing in", "danger");
+          return;
         }
-        state.userEmail = email;
         state.isLoggedIn = true;
         
         localStorage.setItem("cf_is_logged_in", "true");
         localStorage.setItem("cf_user_name", state.userName);
         localStorage.setItem("cf_user_email", state.userEmail);
+
+        // Fetch state from database
+        await syncState();
         
         showToast(`Signed in successfully as ${state.userName}`, "success");
         addActivity(`Logged in as ${state.userName} (${state.userEmail}).`);
@@ -2363,6 +2591,23 @@ function initAuthHandlers() {
           showToast("Please enter your name", "warning");
           return;
         }
+
+        try {
+          const res = await fetch(`${API_BASE}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password: pass })
+          });
+          if (!res.ok) {
+            const data = await parseJsonResponse(res);
+            showToast(data?.error || "Signup failed", "danger");
+            return;
+          }
+        } catch (err) {
+          console.error("Signup network error:", err);
+          showToast("Network error registering account", "danger");
+          return;
+        }
         
         state.userName = name;
         state.userEmail = email;
@@ -2371,6 +2616,9 @@ function initAuthHandlers() {
         localStorage.setItem("cf_is_logged_in", "true");
         localStorage.setItem("cf_user_name", state.userName);
         localStorage.setItem("cf_user_email", state.userEmail);
+
+        // Fetch state from database (will be empty)
+        await syncState();
         
         showToast(`Account created successfully! Welcome, ${state.userName}`, "success");
         addActivity(`Registered new account: ${state.userName} (${state.userEmail}).`);
@@ -2386,18 +2634,32 @@ function initAuthHandlers() {
       state.isLoggedIn = false;
       localStorage.setItem("cf_is_logged_in", "false");
       
+      // Reset user-specific state to empty
+      state.appliedJobIds = [];
+      state.solvedDsaProblemIds = new Set();
+      state.dsaProblemNotes = {};
+      state.quizScores = {};
+      state.hrAnswers = {};
+      state.activityLog = [{ time: new Date().toLocaleTimeString(), msg: "Welcome to CareerForge. Let's start preparing!" }];
+
       showToast("Signed out successfully", "info");
-      addActivity("Logged out of the session.");
       
       applyAuth();
+      renderDashboard();
+      renderPrepArena();
+      renderDsaSheet();
+      renderJobs();
     });
   }
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   // Sync Theme
   const currentTheme = localStorage.getItem("cf_theme") || "dark";
   applyTheme(currentTheme);
+  
+  // Sync states with server
+  await syncState();
   
   const themeToggle = document.getElementById("theme-toggle");
   const landingThemeToggle = document.getElementById("landing-theme-toggle");
@@ -2439,4 +2701,3 @@ window.addEventListener("DOMContentLoaded", () => {
     showToast("Welcome back, Ayush! Dashboard synchronized.", "info");
   }
 });
-
