@@ -11,7 +11,8 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static frontend files from current directory
-app.use(express.static(__dirname));
+// Serve static frontend files from public folder
+app.use(express.static(path.join(__dirname, "public")));
 
 // Mock Prep Arena constant (Static content served via API to lighten frontend)
 const MOCK_PREP = {
@@ -620,10 +621,9 @@ app.get('/api/sync', async (req, res) => {
     res.status(500).json({ error: 'Failed to synchronize state' });
   }
 });
-
 // Fallback HTML router (serve index.html for all other routes to enable frontend navigation)
 app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname,"public","index.html"));
 });
 
 // Start Express server and initialize database tables
@@ -641,4 +641,10 @@ async function startServer() {
   }
 }
 
-startServer();
+// If we are not running on Vercel, start the server locally
+if (process.env.NODE_ENV !== 'production') {
+  startServer();
+}
+
+// Export the app for Vercel Serverless Functions
+module.exports = app;
