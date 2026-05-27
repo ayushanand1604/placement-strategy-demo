@@ -1080,14 +1080,20 @@ async function parseJsonResponse(res) {
 }
 
 // State Synchronization from Backend Database
-async function syncState() {
+async function syncState(onlyUser = false) {
   try {
-    const promises = [
-      fetch(`${API_BASE}/api/jobs`).then(r => r.ok ? r.json().catch(() => null) : null),
-      fetch(`${API_BASE}/api/companies`).then(r => r.ok ? r.json().catch(() => null) : null),
-      fetch(`${API_BASE}/api/dsa`).then(r => r.ok ? r.json().catch(() => null) : null),
-      fetch(`${API_BASE}/api/prep`).then(r => r.ok ? r.json().catch(() => null) : null)
-    ];
+    const promises = [];
+    
+    if (!onlyUser) {
+      promises.push(
+        fetch(`${API_BASE}/api/jobs`).then(r => r.ok ? r.json().catch(() => null) : null),
+        fetch(`${API_BASE}/api/companies`).then(r => r.ok ? r.json().catch(() => null) : null),
+        fetch(`${API_BASE}/api/dsa`).then(r => r.ok ? r.json().catch(() => null) : null),
+        fetch(`${API_BASE}/api/prep`).then(r => r.ok ? r.json().catch(() => null) : null)
+      );
+    } else {
+      promises.push(Promise.resolve(null), Promise.resolve(null), Promise.resolve(null), Promise.resolve(null));
+    }
 
     if (state.isLoggedIn) {
       promises.push(fetch(`${API_BASE}/api/sync?email=${encodeURIComponent(state.userEmail)}`).then(r => r.ok ? r.json().catch(() => null) : null));
@@ -2592,8 +2598,8 @@ function initAuthHandlers() {
         localStorage.setItem("cf_user_name", state.userName);
         localStorage.setItem("cf_user_email", state.userEmail);
 
-        // Fetch state from database
-        await syncState();
+        // Fetch state from database (only user specific data)
+        await syncState(true);
         
         showToast(`Signed in successfully as ${state.userName}`, "success");
         addActivity(`Logged in as ${state.userName} (${state.userEmail}).`);
@@ -2633,7 +2639,7 @@ function initAuthHandlers() {
         localStorage.setItem("cf_user_email", state.userEmail);
 
         // Fetch state from database (will be empty)
-        await syncState();
+        await syncState(true);
         
         showToast(`Account created successfully! Welcome, ${state.userName}`, "success");
         addActivity(`Registered new account: ${state.userName} (${state.userEmail}).`);
