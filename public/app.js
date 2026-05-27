@@ -1043,8 +1043,8 @@ let MOCK_DSA_SHEET = [
 
 const state = {
   isLoggedIn: localStorage.getItem("cf_is_logged_in") === "true",
-  userName: localStorage.getItem("cf_user_name") || "Ayush Anand",
-  userEmail: localStorage.getItem("cf_user_email") || "ayush@example.com",
+  userName: localStorage.getItem("cf_user_name") || "",
+  userEmail: localStorage.getItem("cf_user_email") || "",
   activeTab: "landing",
   activePrepSubtab: "aptitude",
   selectedJobId: "job-1",
@@ -2490,6 +2490,10 @@ function applyAuth() {
           e.stopPropagation();
           state.isLoggedIn = false;
           localStorage.setItem("cf_is_logged_in", "false");
+          localStorage.removeItem("cf_user_name");
+          localStorage.removeItem("cf_user_email");
+          state.userName = "";
+          state.userEmail = "";
           showToast("Signed out successfully", "info");
           addActivity("Logged out of the session.");
           applyAuth();
@@ -2646,6 +2650,10 @@ function initAuthHandlers() {
     btnLogout.addEventListener("click", () => {
       state.isLoggedIn = false;
       localStorage.setItem("cf_is_logged_in", "false");
+      localStorage.removeItem("cf_user_name");
+      localStorage.removeItem("cf_user_email");
+      state.userName = "";
+      state.userEmail = "";
       
       // Reset user-specific state to empty
       state.appliedJobIds = [];
@@ -2711,6 +2719,6 @@ window.addEventListener("DOMContentLoaded", async () => {
   switchTab(state.activeTab);
   
   if (state.isLoggedIn) {
-    showToast("Welcome back, Ayush! Dashboard synchronized.", "info");
+    showToast(`Welcome back, ${state.userName.split(" ")[0]}! Dashboard synchronized.`, "info");
   }
 });
