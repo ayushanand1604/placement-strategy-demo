@@ -7,11 +7,11 @@ function hashPassword(password) {
 }
 // Database configuration loaded from environment variables
 const dbConfig = {
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.DB_PORT || '3306'),
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'careerforge',
+  host: process.env.DB_HOST || process.env.Host || '127.0.0.1',
+  port: parseInt(process.env.DB_PORT || process.env.Port || '3306'),
+  user: process.env.DB_USER || process.env.User || 'root',
+  password: process.env.DB_PASSWORD || process.env.Password || '',
+  database: process.env.DB_NAME || process.env.Databasename || 'careerforge',
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 };
 let pool;
