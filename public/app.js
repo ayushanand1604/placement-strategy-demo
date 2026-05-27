@@ -1082,39 +1082,37 @@ async function parseJsonResponse(res) {
 // State Synchronization from Backend Database
 async function syncState() {
   try {
-    const jobsRes = await fetch(`${API_BASE}/api/jobs`);
-    if (jobsRes.ok) MOCK_JOBS = await jobsRes.json();
-
-    const compRes = await fetch(`${API_BASE}/api/companies`);
-    if (compRes.ok) MOCK_COMPANIES = await compRes.json();
-
-    const dsaRes = await fetch(`${API_BASE}/api/dsa`);
-    if (dsaRes.ok) MOCK_DSA_SHEET = await dsaRes.json();
-
-    const prepRes = await fetch(`${API_BASE}/api/prep`);
-    if (prepRes.ok) {
-      const prepData = await parseJsonResponse(prepRes);
-      if (prepData && typeof prepData === 'object' &&
-          Object.values(prepData).some(v => v && Array.isArray(v.notes) && Array.isArray(v.quizzes))) {
-        MOCK_PREP = prepData;
-      }
-    }
+    const promises = [
+      fetch(`${API_BASE}/api/jobs`).then(r => r.ok ? r.json().catch(() => null) : null),
+      fetch(`${API_BASE}/api/companies`).then(r => r.ok ? r.json().catch(() => null) : null),
+      fetch(`${API_BASE}/api/dsa`).then(r => r.ok ? r.json().catch(() => null) : null),
+      fetch(`${API_BASE}/api/prep`).then(r => r.ok ? r.json().catch(() => null) : null)
+    ];
 
     if (state.isLoggedIn) {
-      const syncRes = await fetch(`${API_BASE}/api/sync?email=${encodeURIComponent(state.userEmail)}`);
-      if (syncRes.ok) {
-        const data = await syncRes.json();
-        state.appliedJobIds = data.appliedJobIds || [];
-        state.customJobs = data.customJobs || [];
-        state.solvedDsaProblemIds = new Set(data.solvedDsaProblemIds || []);
-        state.dsaProblemNotes = data.dsaProblemNotes || {};
-        state.quizScores = data.quizScores || {};
-        state.hrAnswers = data.hrAnswers || {};
-        state.activityLog = data.activityLog || [];
-      }
+      promises.push(fetch(`${API_BASE}/api/sync?email=${encodeURIComponent(state.userEmail)}`).then(r => r.ok ? r.json().catch(() => null) : null));
+    }
+
+    const [jobs, comps, dsa, prep, syncData] = await Promise.all(promises);
+
+    if (jobs) MOCK_JOBS = jobs;
+    if (comps) MOCK_COMPANIES = comps;
+    if (dsa) MOCK_DSA_SHEET = dsa;
+    if (prep && typeof prep === 'object' && Object.values(prep).some(v => v && Array.isArray(v.notes) && Array.isArray(v.quizzes))) {
+      MOCK_PREP = prep;
+    }
+
+    if (state.isLoggedIn && syncData) {
+      state.appliedJobIds = syncData.appliedJobIds || [];
+      state.customJobs = syncData.customJobs || [];
+      state.solvedDsaProblemIds = new Set(syncData.solvedDsaProblemIds || []);
+      state.dsaProblemNotes = syncData.dsaProblemNotes || {};
+      state.quizScores = syncData.quizScores || {};
+      state.hrAnswers = syncData.hrAnswers || {};
+      state.activityLog = syncData.activityLog || [];
     }
   } catch (err) {
-    console.error("Error syncing with backend:", err);
+    console.error("State synchronization failed:", err);
   }
 }
 
