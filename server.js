@@ -263,8 +263,18 @@ const MOCK_PREP = {
 };
 
 // ----------------------------------------
-// 1. API: AUTHENTICATION ROUTES
+// 1. API: SETUP & AUTHENTICATION ROUTES
 // ----------------------------------------
+
+app.get('/api/setup', async (req, res) => {
+  try {
+    await db.initDB();
+    res.json({ success: true, message: 'Database tables created and default data seeded successfully!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to initialize database', details: err.message });
+  }
+});
 
 app.post('/api/auth/register', async (req, res) => {
   const { name, email, password } = req.body;

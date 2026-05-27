@@ -11,7 +11,8 @@ const dbConfig = {
   port: parseInt(process.env.DB_PORT || '3306'),
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'careerforge'
+  database: process.env.DB_NAME || 'careerforge',
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 };
 let pool;
 async function getPool() {
@@ -30,18 +31,20 @@ async function getPool() {
 async function initDB() {
   let connection;
   try {
-    // 1. First connect without selecting a database, to create it if it doesn't exist
-    connection = await mysql.createConnection({
-      host: dbConfig.host,
-      port: dbConfig.port,
-      user: dbConfig.user,
-      password: dbConfig.password
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      // 1. First connect without selecting a database, to create it if it doesn't exist (Local only)
+      connection = await mysql.createConnection({
+        host: dbConfig.host,
+        port: dbConfig.port,
+        user: dbConfig.user,
+        password: dbConfig.password
+      });
 
-    console.log('Connected to MySQL server for initialization...');
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`);
-    console.log(`Database "${dbConfig.database}" verified/created.`);
-    await connection.end();
+      console.log('Connected to MySQL server for initialization...');
+      await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`);
+      console.log(`Database "${dbConfig.database}" verified/created.`);
+      await connection.end();
+    }
 
     // 2. Obtain connection pool for the created database
     const dbPool = await getPool();
